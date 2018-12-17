@@ -40,7 +40,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -56,7 +56,7 @@ int sockd_handledsignals(void); /* no sockd.h here. */
 
 
 /* inspired by Stevens 'incorrect' implementation; best effort if no pselect */
-
+//包装select
 inline int
 pselect(int nfds, fd_set *rset, fd_set *wset, fd_set *xset,
     const struct timespec *ts, const sigset_t *sigmask)
@@ -65,9 +65,11 @@ pselect(int nfds, fd_set *rset, fd_set *wset, fd_set *xset,
     sigset_t sm;
     int n;
 
+    //设置信号掩码
     if (sigprocmask(SIG_SETMASK, sigmask, &sm) == -1)
        return -1;
 
+    //如果必要，设置select的超时时间
     if (ts != NULL) {
         tv.tv_sec  = ts->tv_sec;
         tv.tv_usec = ts->tv_nsec / 1000;

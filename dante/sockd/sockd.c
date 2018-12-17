@@ -33,7 +33,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -368,7 +368,7 @@ moncontrol(1);
            (unsigned long)free_ioc);
 
       p = selectn(++rbits,
-                  rset,
+                  rset,/*读集合*/
                   NULL,
                   NULL,
                   NULL,
@@ -387,11 +387,13 @@ moncontrol(1);
        * First get standalone ack of free slots for requests that did not
        * require the children to send us any new client objects.
        */
+      //取出可读的fd
       while ((child = getset(ACKPIPE, rset)) != NULL) {
          unsigned char command;
          int childisbad = 0, childhasfinished = 0;
 
          errno = 0;
+         //收取信息
          p     = socks_recvfromn(child->ack,
                                  &command,
                                  sizeof(command),
@@ -425,6 +427,7 @@ moncontrol(1);
             childisbad = 1;
          }
          else
+        	 	//命令处理
             handlechildcommand(command, child, &childhasfinished);
 
          if (childhasfinished || childisbad) {

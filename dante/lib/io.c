@@ -33,7 +33,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -1027,7 +1027,7 @@ sendmsgn(s, msg, flags, timeoutms)
 }
 
 int
-selectn(nfds, rset, bufrset, buffwset, wset, xset, _timeout)
+selectn(nfds, rset/*读fds*/, bufrset, buffwset, wset/*写fds*/, xset/*异常fds*/, _timeout)
    int nfds;
    fd_set *rset;
    fd_set *bufrset;
