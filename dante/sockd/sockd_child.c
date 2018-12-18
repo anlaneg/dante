@@ -33,7 +33,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -477,6 +477,7 @@ fillset(set, negc, reqc, ioc)
        */
 
       SASSERTX(sockscf.internal.addrv[i].s >= 0);
+      //将fd存入set,并获取set中最大的fd
       FD_SET(sockscf.internal.addrv[i].s, set);
       dbits = MAX(dbits, sockscf.internal.addrv[i].s);
    }
@@ -1393,6 +1394,7 @@ addchild(type)
    /*
     * create datapipe ...
     */
+   //创建unix socket pipe
    if (socketpair(AF_LOCAL, SOCK_DGRAM, 0, datapipev) != 0) {
       swarn("%s: socketpair(AF_LOCAL, SOCK_DGRAM)", function);
       return NULL;
@@ -1421,6 +1423,7 @@ addchild(type)
    reason = "pipe between moter and child";
 #endif /* !HAVE_VALGRIND_VALGRIND_H */
 
+   //将两个pipe置为非阻塞
    if (setnonblocking(ackpipev[0],  reason)  == -1
    ||  setnonblocking(ackpipev[1],  reason)  == -1
    ||  setnonblocking(datapipev[0], reason)  == -1
@@ -1469,6 +1472,7 @@ addchild(type)
     * differentiating between snd/rcv-sizes for mother/child, but not
     * bothering with that at the moment.
     */
+   //依据type,设置child列表及function,设置rcvbuf,sndbuf的缓冲区大小
    switch (setchildtype(type, &childv, &childc, &childfunction)) {
       case PROC_MONITOR:
          /* only exit message is expected, so set to some small size. */
@@ -1565,6 +1569,7 @@ addchild(type)
 
    p = rcvbuf;
    do {
+	  //设置接收fd的缓冲区大小
       if (setsockopt(datapipev[MOTHER],
                      SOL_SOCKET,
                      optname_rcvbuf,
@@ -1578,10 +1583,10 @@ addchild(type)
          slog(LOG_DEBUG, "%s: could not set SO_RCVBUF to %d: %s",
               function, p, strerror(errno));
 
-         p -= min;
+         p -= min;//设置失败，减少缓冲区大小后重试
       }
       else
-         break;
+         break;//设置成功
    } while (p > min);
 
 #ifdef SO_RCVBUFFORCE
@@ -1589,6 +1594,7 @@ addchild(type)
       sockd_priv(SOCKD_PRIV_PRIVILEGED, PRIV_OFF);
 #endif /* !SO_RCVBUFFORCE */
 
+   //获取接收缓冲区大小
    optlen = sizeof(rcvbuf_set1);
    if (getsockopt(datapipev[MOTHER],
                   SOL_SOCKET,
@@ -1617,6 +1623,7 @@ addchild(type)
 #endif /* !SO_SNDBUFFORCE */
       optname_sndbuf = SO_SNDBUF;
 
+   //设置发送缓冲区大小
    p = sndbuf;
    do {
       if (setsockopt(datapipev[MOTHER],
@@ -1644,6 +1651,7 @@ addchild(type)
       sockd_priv(SOCKD_PRIV_PRIVILEGED, PRIV_OFF);
 #endif /* !SO_SNDBUFFORCE */
 
+   //获取设置的发送缓冲区大小
    optlen = sizeof(sndbuf_set1);
    if (getsockopt(datapipev[MOTHER],
                   SOL_SOCKET,
@@ -1664,6 +1672,7 @@ addchild(type)
    }
 
 
+   //实际生效值小于设置的值时进入
    if (rcvbuf_set1 < rcvbuf || rcvbuf_set2 < rcvbuf
    ||  sndbuf_set1 < sndbuf || sndbuf_set2 < sndbuf) {
       const int isfatal = (rcvbuf_set1 < min || rcvbuf_set2 < min
@@ -2058,6 +2067,7 @@ addchild(type)
 }
 
 
+//依据不同type查找不同的列表及function
 static int
 setchildtype(type, childv, childc, function)
    int type;

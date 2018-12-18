@@ -33,7 +33,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -259,6 +259,7 @@ bindinternal(protocol)
          continue;
       }
 
+      //创建流式socket
       if ((l->s = socket(l->addr.ss_family, SOCK_STREAM, 0)) == -1) {
          swarn("%s: could not create %s socket(2)",
                function, safamily2string(l->addr.ss_family));

@@ -116,6 +116,7 @@ char *__progname = "covenantd";   /* default. */
 extern char *optarg;
 
 #if !HAVE_SETPROCTITLE
+//保存参数数目及参数
 char **argv_cpy;
 int argc_cpy;
 #endif /* !HAVE_SETPROCTITLE */
@@ -163,6 +164,7 @@ main(argc, argv)
    runenvcheck();
 
 #if !HAVE_SETPROCTITLE
+   //实现参数复制
    argc_cpy = argc;
    if ((argv_cpy = malloc(sizeof(*argv_cpy) * (argc + 1))) == NULL)
       serr("%s: could not allocate %lu bytes of memory",
@@ -189,6 +191,7 @@ main(argc, argv)
 
    showconfig(&sockscf);
 
+   //校验配置后退出
    if (sockscf.option.verifyonly) {
       resetconfig(&sockscf, 1);
       return 0;
@@ -212,6 +215,7 @@ main(argc, argv)
 
    time_monotonic(&sockscf.stat.boot);
 
+   //处理需要创建多个server的情况
    if (sockscf.option.serverc > 1) {
       /*
        * Temporarily block signals to avoid mixing up signals to us
@@ -233,6 +237,7 @@ main(argc, argv)
          if ((pid = fork()) == -1)
             swarn("fork()");
          else if (pid == 0) {
+        	    //使子进程向下运行，走break并跳出
             newprocinit();
 
             bzero(&sigact, sizeof(sigact));
@@ -248,6 +253,7 @@ main(argc, argv)
             break;
          }
          else {
+        	    //显示fork成功后，继续fork
             slog(LOG_DEBUG, "forked of %s[%lu/%lu] with pid %lu",
                 childtype2string(PROC_MOTHER),
                 (unsigned long)i + 1,
@@ -262,6 +268,7 @@ main(argc, argv)
          swarn("%s: sigprocmask(SIG_SETMASK, &oldmask, NULL)", function);
    }
 
+   //检查当前进程是否为主进程
    if (pidismainmother(sockscf.state.pid)) {
       if (sockscf.option.debug)
          sockopts_dump();
@@ -303,6 +310,7 @@ moncontrol(1);
    PRODUCT);
 #endif /* PRERELEASE */
 
+   //为rset申请内存
    rset = allocate_maxsize_fdset();
 
    slog(LOG_INFO, "%s/server[%d/%d] v%s running\n",
@@ -393,7 +401,7 @@ moncontrol(1);
          int childisbad = 0, childhasfinished = 0;
 
          errno = 0;
-         //收取信息
+         //收取command
          p     = socks_recvfromn(child->ack,
                                  &command,
                                  sizeof(command),
@@ -406,18 +414,22 @@ moncontrol(1);
          clearset(ACKPIPE, child, rset);
 
          if (p != sizeof(command)) {
+        	 	//收取的长度与command不相符
             switch (p) {
                case -1:
+            	   	  //出错
                   swarn("socks_recvfrom(child->ack) from %s %ld failed",
                         childtype2string(child->type), (long)child->pid);
                   break;
 
                case 0:
+            	   	  //到达文件结尾
                   swarnx("EOF from %s %ld",
                          childtype2string(child->type), (long)child->pid);
                   break;
 
                default:
+            	      //没有读取到足够的长度
                   swarnx("unexpected byte count from %s %ld.  "
                          "Expected %lu, got %lu",
                          childtype2string(child->type), (long)child->pid,
@@ -427,7 +439,7 @@ moncontrol(1);
             childisbad = 1;
          }
          else
-        	 	//命令处理
+        	 	//处理命令
             handlechildcommand(command, child, &childhasfinished);
 
          if (childhasfinished || childisbad) {
@@ -1220,7 +1232,7 @@ moncontrol(1);
 }
 #endif /* STANDALONE_UNIT_TEST  */
 
-
+//显示用法
 static void
 usage(code)
    int code;
@@ -1338,6 +1350,7 @@ showversion(level)
    }
 }
 
+//显示license
 static void
 showlicense(void)
 {
@@ -1401,10 +1414,12 @@ serverinit(argc, argv)
    int ch;
 
 #if !HAVE_PROGNAME
+   //设置程序名称
    if (argv[0] != NULL) {
       if ((__progname = strrchr(argv[0], '/')) == NULL)
          __progname = argv[0];
       else
+    	  	 //跳过匹配的'/'
          ++__progname;
    }
 #endif /* !HAVE_PROGNAME */
@@ -1428,14 +1443,17 @@ serverinit(argc, argv)
    while ((ch = getopt(argc, argv, "DLN:Vd:f:hnp:v")) != -1) {
       switch (ch) {
          case 'D':
+        	 	//定义为daemon
             sockscf.option.daemon = 1;
             break;
 
          case 'L':
+        	 	//显示license后退出
             showlicense();
             /* NOTREACHED */
 
          case 'N': {
+        	 	//解析需要多少个server
             char *endptr;
 
             if ((sockscf.option.serverc = (int)strtol(optarg, &endptr, 10)) < 1
@@ -1448,10 +1466,12 @@ serverinit(argc, argv)
          }
 
          case 'V':
+        	 	//仅校验配置文件语法
             sockscf.option.verifyonly = 1;
             break;
 
          case 'd': {
+        	 	//解析debug level
             char *endptr;
 
             if ((sockscf.option.debug = (int)strtol(optarg, &endptr, 10)) < 0
@@ -1465,10 +1485,12 @@ serverinit(argc, argv)
          }
 
          case 'f':
+        	 	 //记录配置文件
             sockscf.option.configfile = optarg;
             break;
 
          case 'h':
+        	 	//显示用法
             usage(0);
             /* NOTREACHED */
 
@@ -1477,10 +1499,12 @@ serverinit(argc, argv)
             break;
 
          case 'p':
+        	    //pid文件名称
             sockscf.option.pidfile = optarg;
             break;
 
          case 'v':
+        	 	//仅仅显示版
             ++sockscf.option.versiononly;
             break;
 
@@ -1495,14 +1519,17 @@ serverinit(argc, argv)
     */
    sockscf.initial.cmdline = sockscf.option;
 
+   //跳过已处理的参数及选项
    argc -= optind;
    argv += optind;
 
+   //如果仅需要显示版本，则显示后退出
    if (sockscf.option.versiononly) {
       showversion(sockscf.option.versiononly);
       exit(EXIT_SUCCESS);
    }
 
+   //申请serverc个motherpridv（用于记录pid)并初始化
    if ((sockscf.state.motherpidv = malloc(sizeof(*sockscf.state.motherpidv)
                                           * sockscf.option.serverc)) == NULL)
       serrx("%s", NOMEM);
@@ -1513,12 +1540,15 @@ serverinit(argc, argv)
    /* we are the main server. */
    *sockscf.state.motherpidv = sockscf.state.pid = getpid();
 
+   //参数错误处理
    if (argc > 0)
       serrx("%s: unknown argument %s", function, *argv);
 
+   //未指定，使用默认配置文件
    if (sockscf.option.configfile == NULL)
       sockscf.option.configfile = SOCKD_CONFIGFILE;
 
+   //未指定，使用pid文件
    if (sockscf.option.pidfile == NULL)
       sockscf.option.pidfile = SOCKD_PIDFILE;
 

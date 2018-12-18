@@ -33,7 +33,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -77,6 +77,7 @@ genericinit(void)
    }
 
 #if !SOCKS_CLIENT
+   //阻塞信号
    sigemptyset(&set);
    sigaddset(&set, SIGHUP);
    sigaddset(&set, SIGTERM);
@@ -86,10 +87,12 @@ genericinit(void)
 
    optioninit();
 
+   //解析配置文件（利用yacc)
    if (parseconfig(sockscf.option.configfile) != 0)
       return;
 
 #if !SOCKS_CLIENT
+   //还原信号处理
    if (sigprocmask(SIG_SETMASK, &oset, NULL) != 0)
       swarn("%s: sigprocmask(SIG_SETMASK)", function);
 #endif /* !SOCKS_CLIENT */

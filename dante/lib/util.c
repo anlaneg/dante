@@ -33,7 +33,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -1174,6 +1174,7 @@ allocate_maxsize_fdset(void)
    SASSERTX(sockscf.state.maxopenfiles < (rlim_t)RLIM_INFINITY);
    SASSERTX(sockscf.state.maxopenfiles > 0);
 
+   //申请set所需内存
    if ((set = malloc(MAX(sizeof(fd_set), SOCKD_FD_SIZE()))) == NULL)
       serr("%s: malloc() of %lu bytes for fd_set failed",
            function, (unsigned long)MAX(sizeof(fd_set), SOCKD_FD_SIZE()));

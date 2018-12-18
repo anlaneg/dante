@@ -32,7 +32,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -55,6 +55,7 @@ uminmaxvalueoftype(const size_t typelen, unsigned long long *min,
                    unsigned long long *max);
 
 
+//类型长度检查
 void
 runenvcheck(void)
 {
@@ -74,6 +75,7 @@ runenvcheck(void)
                 };
    size_t i;
 
+   //检查类型长度是否合科期待
    for (i = 0; i < ELEMENTS(checkv); ++i)
       if (checkv[i].expectedsize != checkv[i].actualsize)
          serrx("%s: expected size of %s %lu bit type to be %lu (based on "

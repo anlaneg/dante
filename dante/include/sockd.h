@@ -33,7 +33,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -1621,6 +1621,7 @@ typedef struct {
 typedef struct {
    char              *configfile;     /* name of config file.                 */
 
+   //运行为daemon
    unsigned char     daemon;          /* run as a daemon?                     */
 
    int               debug;           /* debug level.                         */

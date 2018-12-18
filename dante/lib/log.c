@@ -33,7 +33,7 @@
  *  Software Distribution Coordinator  or  sdc@inet.no
  *  Inferno Nettverk A/S
  *  Oslo Research Park
- *  Gaustadall�en 21
+ *  Gaustadall�en 21
  *  NO-0349 Oslo
  *  Norway
  *
@@ -607,6 +607,7 @@ newprocinit(void)
        * LOG_NDELAY so we don't end up in a situation where we
        * have no free descriptors and haven't yet syslog-ed anything.
        */
+      //打开日志
       openlog(__progname,
               LOG_NDELAY | LOG_PID
 #ifdef LOG_NOWAIT

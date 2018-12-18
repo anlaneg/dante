@@ -2495,6 +2495,7 @@ parseconfig(filename)
       sockd_priv(SOCKD_PRIV_PRIVILEGED, PRIV_ON);
 #endif /* !SOCKS_CLIENT */
 
+   //打开配置文件（作者这是要用yacc呀！）
    yyin = fopen(filename, "r");
 
 #if !SOCKS_CLIENT
